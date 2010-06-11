@@ -10,10 +10,11 @@ Add this to your project.clj :dependencies list:
 
     [robert/hooke "1.0.0"]
 
-If you wish to make your project extensible using Robert Hooke, make
-some clear conventions as to namespaces that will get loaded
-automatically at startup so people wishing to extend your
-functionality may place calls to add-hook there.
+If you would like to make your software extensible using Hooke, all
+you need to do is provide a convention for namespaces that will get
+loaded on startup. Then users can place files that call add-hook under
+a specific namespace prefix (my.program.hooks.*) which they can rely
+on getting loaded at startup.
 
 ## Usage
 
@@ -54,12 +55,6 @@ target function; if there is more than one hook then the first hook
 will receive a function that is a composition of the remaining
 hooks. But when you're writing hooks, you should act as if it is the
 target function.
-
-If you would like to make your software extensible using Hooke, all
-you need to do is provide a convention for namespaces that will get
-loaded on startup. Then users can place files that call add-hook under
-a specific namespace prefix (my.program.hooks.*) which they can rely
-on getting loaded at startup.
 
 ## License
 

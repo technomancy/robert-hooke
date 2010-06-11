@@ -6,6 +6,15 @@ after [Robert Hooke FRS](http://en.wikipedia.org/wiki/Robert_Hooke), a
 founding member of the Royal Society who made many important
 discoveries in the fields of Gravitation, Microscopy, and Astronomy.
 
+Add this to your project.clj :dependencies list:
+
+    [robert/hooke "1.0.0"]
+
+If you wish to make your project extensible using Robert Hooke, make
+some clear conventions as to namespaces that will get loaded
+automatically at startup so people wishing to extend your
+functionality may place calls to add-hook there.
+
 ## Usage
 
     (use 'robert.hooke)

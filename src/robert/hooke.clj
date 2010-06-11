@@ -15,7 +15,7 @@
       (apply f args))
 
     (defn telescope [f x]
-      (f (apply str (interpose " " x))))
+      (f (apply str (interpose \" \" x))))
 
     (add-hook #'examine microscope)
     (add-hook #'examine doubler)

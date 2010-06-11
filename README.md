@@ -16,6 +16,8 @@ loaded on startup. Then users can place files that call add-hook under
 a specific namespace prefix (my.program.hooks.*) which they can rely
 on getting loaded at startup.
 
+Hooke is inspired by Emacs Lisp's defadvice and clojure.test fixtures.
+
 ## Usage
 
     (use 'robert.hooke)

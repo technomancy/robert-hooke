@@ -47,13 +47,18 @@
                           (assoc (meta original)
                             ::hooks (atom ()) ::original original))))))
 
+(defn add-unless-present [coll f]
+  (if-not (some #{f} coll)
+    (conj coll f)
+    coll))
+
 (defn add-hook
   "Add a hook function f to target-var. Hook functions are passed the
   target function and all their arguments and must apply the target to
   the args if they wish to continue execution."
   [target-var f]
   (prepare-for-hooks target-var)
-  (swap! (::hooks (meta @target-var)) conj f))
+  (swap! (::hooks (meta @target-var)) add-unless-present f))
 
 (defn remove-hook
   "Remove hook function f from target-var."

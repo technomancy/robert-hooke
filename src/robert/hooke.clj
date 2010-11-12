@@ -8,7 +8,7 @@
       \"The keen powers of observation enabled by Robert Hooke allow
       for a closer look at any object!\"
       [f x]
-      (f (.toUpperCase x)))
+      (f (.toUpperCase (str x))))
 
     (defn doubler [f & args]
       (apply f args)
@@ -23,8 +23,8 @@
 
     ;; Now when we examine something:
     (examine \"something\")
-    > SOMETHING
-    > SOMETHING
+    > S O M E T H I N G
+    > S O M E T H I N G
 
   Use the add-hook function to wrap a function in your a hook.")
 
@@ -47,7 +47,7 @@
                           (assoc (meta original)
                             ::hooks (atom ()) ::original original))))))
 
-(defn add-unless-present [coll f]
+(defn- add-unless-present [coll f]
   (if-not (some #{f} coll)
     (conj coll f)
     coll))
@@ -69,3 +69,14 @@
     (when (empty? @(::hooks (meta @target-var)))
       (alter-var-root target-var
                       (constantly (::original (meta @target-var)))))))
+
+(defmacro prepend [target-var & body]
+  `(add-hook (var ~target-var) (fn [f# & args#]
+                                 ~@body
+                                 (apply f# args#))))
+
+(defmacro append [target-var & body]
+  `(add-hook (var ~target-var) (fn [f# & args#]
+                                 (let [val# (apply f# args#)]
+                                   ~@body
+                                   val#))))

@@ -30,3 +30,23 @@
     (remove-hook #'hooked asplode)
     (is (= hooked orig-hooked))
     (is (hooked))))
+
+(defn print-name [name]
+  (println name))
+
+(deftest test-prepend
+  (prepend print-name
+           (println "The following person is awesome:"))
+  (is (= "The following person is awesome:\nGilbert K. Chesterton\n"
+         (with-out-str
+           (print-name "Gilbert K. Chesterton")))))
+
+(defn ohai []
+  :hello)
+
+(def appended (atom false))
+
+(deftest test-append
+  (append ohai (reset! appended true))
+  (is (= :hello (ohai)))
+  (is @appended))

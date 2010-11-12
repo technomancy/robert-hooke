@@ -50,3 +50,21 @@
   (append ohai (reset! appended true))
   (is (= :hello (ohai)))
   (is @appended))
+
+(defn another-fn []
+  true)
+
+(deftest test-without-hooks
+  (add-hook #'another-fn asplode)
+  (is (thrown? Exception (another-fn)))
+  (with-hooks-disabled another-fn
+    (is (another-fn))))
+
+(def skip-ran? (atom false))
+
+(deftest ^{:skip true} skipped
+  (reset! skip-ran? true))
+
+(deftest hooks-disabled-works-around-test-selectors
+  (with-hooks-disabled test-var
+    (skipped)))

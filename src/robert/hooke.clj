@@ -80,3 +80,9 @@
                                  (let [val# (apply f# args#)]
                                    ~@body
                                    val#))))
+
+(defmacro with-hooks-disabled [v & body]
+  `(do (when-not (::hooks (meta ~v))
+         (throw (Exception. (str "No hooks on" ~v))))
+       (binding [~v (::original (meta ~v))]
+         ~@body)))

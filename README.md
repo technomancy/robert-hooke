@@ -8,7 +8,7 @@ discoveries in the fields of Gravitation, Microscopy, and Astronomy.
 
 Add this to your project.clj :dependencies list:
 
-    [robert/hooke "1.0.2"]
+    [robert/hooke "1.1.0"]
 
 If you would like to make your software extensible using Hooke, all
 you need to do is provide a convention for namespaces that will get

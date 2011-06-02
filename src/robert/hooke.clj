@@ -36,16 +36,17 @@
   (reduce compose-hooks original hooks))
 
 (defn- run-hooks [hooked original args]
-  (apply (join-hooks original @(::hooks (meta hooked))) args))
+  (apply (join-hooks original @(:robert.hooke/hook (meta hooked))) args))
 
 (defn- prepare-for-hooks [v]
-  (when-not (::hooks (meta @v))
+  (when-not (:robert.hooke/hook (meta @v))
     (alter-var-root v (fn [original]
                         (with-meta
                           (fn runner [& args]
                             (run-hooks runner original args))
                           (assoc (meta original)
-                            ::hooks (atom ()) ::original original))))))
+                            :robert.hooke/hook (atom ())
+                            :robert.hooke/original original))))))
 
 (defn- add-unless-present [coll f]
   (if-not (some #{f} coll)
@@ -58,17 +59,18 @@
   the args if they wish to continue execution."
   [target-var f]
   (prepare-for-hooks target-var)
-  (swap! (::hooks (meta @target-var)) add-unless-present f))
+  (swap! (:robert.hooke/hook (meta @target-var)) add-unless-present f))
 
 (defn remove-hook
   "Remove hook function f from target-var."
   [target-var f]
-  (when (::hooks (meta @target-var))
-    (swap! (::hooks (meta @target-var))
+  (when (:robert.hooke/hook (meta @target-var))
+    (swap! (:robert.hooke/hook (meta @target-var))
            (partial remove #{f}))
-    (when (empty? @(::hooks (meta @target-var)))
+    (when (empty? @(:robert.hooke/hook (meta @target-var)))
       (alter-var-root target-var
-                      (constantly (::original (meta @target-var)))))))
+                      (constantly (:robert.hooke/original
+                                   (meta @target-var)))))))
 
 (defmacro prepend [target-var & body]
   `(add-hook (var ~target-var) (fn [f# & args#]
@@ -82,7 +84,7 @@
                                    val#))))
 
 (defmacro with-hooks-disabled [v & body]
-  `(do (when-not (::hooks (meta ~v))
-         (throw (Exception. (str "No hooks on" ~v))))
-       (binding [~v (::original (meta ~v))]
+  `(do (when-not (:robert.hooke/hook (meta ~v))
+         (throw (Exception. (str "No hooks on " ~v))))
+       (binding [~v (:robert.hooke/original (meta ~v))]
          ~@body)))

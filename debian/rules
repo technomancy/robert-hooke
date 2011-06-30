@@ -1,0 +1,33 @@
+#!/usr/bin/make -f
+
+clean:
+	rm -rf classes *jar *deb
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_prep
+	dh_installdirs
+
+build:
+	jar cf robert-hooke.jar -C src .
+
+binary-arch: build install
+
+binary-indep: build install
+	dh_testdir
+	dh_testroot
+	dh_prep
+	dh_install -i
+	dh_installdocs -i
+	dh_installchangelogs -i
+	jh_installlibs -i robert-hooke.jar
+	jh_depends -i
+	dh_compress -i
+	dh_fixperms -i
+	dh_installdeb -i
+	dh_gencontrol -i
+	dh_md5sums -i
+	dh_builddeb -i
+
+binary: binary-indep

@@ -1,0 +1,15 @@
+Source: robert-hooke
+Section: java
+Priority: optional
+Maintainer: Phil Hagelberg <technomancy@gmail.com>
+Build-Depends: debhelper (>> 7), javahelper (>= 0.32) 
+Build-Depends-Indep: openjdk-6-jdk
+Standards-Version: 3.8.3
+Homepage: https://github.com/technomancy/robert-hooke
+
+Package: librobert-hooke
+Architecture: all
+Depends: clojure1.2 | clojure, openjdk-6-jre | java2-runtime
+Description: Extend Clojure functions you don't control.
+ Robert Hooke provides a flexible, composable mechanism by which you
+ can extend the behaviour of functions after they've been defined.

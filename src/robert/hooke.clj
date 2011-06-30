@@ -35,18 +35,19 @@
 (defn- join-hooks [original hooks]
   (reduce compose-hooks original hooks))
 
-(defn- run-hooks [hooked original args]
-  (apply (join-hooks original @(:robert.hooke/hook (meta hooked))) args))
+(defn- run-hooks [hook original args]
+  (apply (join-hooks original @hook) args))
 
 (defn- prepare-for-hooks [v]
   (when-not (:robert.hooke/hook (meta @v))
-    (alter-var-root v (fn [original]
-                        (with-meta
-                          (fn runner [& args]
-                            (run-hooks runner original args))
-                          (assoc (meta original)
-                            :robert.hooke/hook (atom ())
-                            :robert.hooke/original original))))))
+    (let [hook (atom ())]
+      (alter-var-root v (fn [original]
+                          (with-meta
+                            (fn [& args]
+                              (run-hooks hook original args))
+                            (assoc (meta original)
+                              :robert.hooke/hook hook
+                              :robert.hooke/original original)))))))
 
 (defn- add-unless-present [coll f]
   (if-not (some #{f} coll)

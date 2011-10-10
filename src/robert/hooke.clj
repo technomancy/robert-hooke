@@ -62,6 +62,11 @@
   (prepare-for-hooks target-var)
   (swap! (:robert.hooke/hook (meta @target-var)) add-unless-present f))
 
+(defn- clear-hook-mechanism [target-var]
+  (alter-var-root target-var
+                  (constantly (:robert.hooke/original
+                               (meta @target-var)))))
+
 (defn remove-hook
   "Remove hook function f from target-var."
   [target-var f]
@@ -69,9 +74,14 @@
     (swap! (:robert.hooke/hook (meta @target-var))
            (partial remove #{f}))
     (when (empty? @(:robert.hooke/hook (meta @target-var)))
-      (alter-var-root target-var
-                      (constantly (:robert.hooke/original
-                                   (meta @target-var)))))))
+      (clear-hook-mechanism target-var))))
+
+(defn clear-hooks
+  "Remove hook function f from target-var."
+  [target-var]
+  (swap! (:robert.hooke/hook (meta @target-var)) empty)
+  (when (empty? @(:robert.hooke/hook (meta @target-var)))
+    (clear-hook-mechanism target-var)))
 
 (defmacro prepend [target-var & body]
   `(add-hook (var ~target-var) (fn [f# & args#]

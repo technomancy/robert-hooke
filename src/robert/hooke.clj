@@ -77,7 +77,7 @@
       (clear-hook-mechanism target-var))))
 
 (defn clear-hooks
-  "Remove hook function f from target-var."
+  "Remove all hooks from target-var."
   [target-var]
   (swap! (:robert.hooke/hook (meta @target-var)) empty)
   (when (empty? @(:robert.hooke/hook (meta @target-var)))

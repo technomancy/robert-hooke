@@ -17,9 +17,9 @@
     (defn telescope [f x]
       (f (apply str (interpose \" \" x))))
 
-    (add-hook #'examine microscope)
-    (add-hook #'examine doubler)
-    (add-hook #'examine telescope)
+    (add-hook #'examine #'microscope)
+    (add-hook #'examine #'doubler)
+    (add-hook #'examine #'telescope)
 
     ;; Now when we examine something:
     (examine \"something\")

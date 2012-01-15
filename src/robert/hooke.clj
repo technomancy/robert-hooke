@@ -79,9 +79,10 @@
 (defn clear-hooks
   "Remove all hooks from target-var."
   [target-var]
-  (swap! (:robert.hooke/hook (meta @target-var)) empty)
-  (when (empty? @(:robert.hooke/hook (meta @target-var)))
-    (clear-hook-mechanism target-var)))
+  (when (:robert.hooke/hook (meta @target-var))
+    (swap! (:robert.hooke/hook (meta @target-var)) empty)
+    (when (empty? @(:robert.hooke/hook (meta @target-var)))
+      (clear-hook-mechanism target-var))))
 
 (defmacro prepend [target-var & body]
   `(add-hook (var ~target-var) (fn [f# & args#]

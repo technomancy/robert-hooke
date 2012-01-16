@@ -31,6 +31,15 @@
     (is (= hooked orig-hooked))
     (is (hooked))))
 
+(deftest test-clear-hooks
+  (is (nil? (meta @#'hooked)))
+  (add-hook #'hooked #'asplode)
+  (is (not (nil? (meta @#'hooked))))
+  (clear-hooks #'hooked)
+  (is (nil? (meta @#'hooked)))
+  (is (= nil (clear-hooks #'hooked)))
+  (is (nil? (meta @#'hooked))))
+
 (defn print-name [name]
   (println name))
 

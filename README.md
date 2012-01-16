@@ -73,9 +73,11 @@ impossible to add further methods. Hooks are meant to extend functions
 you don't control; if you own the target function there are obviously
 better ways to change its behaviour.
 
-When adding hooks be sure to use Var objects for both to ensure 
-consistency between what you get in your REPL and your compiled code,
-i.e.:
+When adding hooks it's best to use vars instead of raw functions in
+order to allow the code to be reloaded interactively. If you recompile
+a function, it will be re-added as a hook, but if you use a var it
+will be able to detect that it's the same thing across reloads and
+avoid duplication.
 
     (add-hook #'some.ns/target-var #'hook-function)
 
@@ -108,6 +110,6 @@ stripped out:
 
 ## License
 
-Copyright (C) 2010 Phil Hagelberg and Kevin Downey
+Copyright © 2010-2011 Phil Hagelberg and Kevin Downey
 
 Distributed under the Eclipse Public License, the same as Clojure.

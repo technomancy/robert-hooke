@@ -48,9 +48,9 @@ Hooke is inspired by Emacs Lisp's defadvice and clojure.test fixtures.
     (defn telescope [f x]
       (f (apply str (interpose " " x))))
 
-    (add-hook #'examine microscope)
-    (add-hook #'examine doubler)
-    (add-hook #'examine telescope)
+    (add-hook #'examine #'microscope)
+    (add-hook #'examine #'doubler)
+    (add-hook #'examine #'telescope)
 
     (examine "something")
     > S O M E T H I N G
@@ -72,6 +72,17 @@ Adding hooks to a defmulti is discouraged as it will make it
 impossible to add further methods. Hooks are meant to extend functions
 you don't control; if you own the target function there are obviously
 better ways to change its behaviour.
+
+When adding hooks be sure to use Var objects for both to ensure 
+consistency between what you get in your REPL and your compiled code,
+i.e.:
+
+    (add-hook #'some.ns/target-var #'hook-function)
+
+instead of:
+
+    (add-hook #'some.ns/target-var hook-function)
+
 
 ## Bonus Features
 

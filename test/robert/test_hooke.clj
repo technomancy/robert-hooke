@@ -32,13 +32,15 @@
     (is (hooked))))
 
 (deftest test-clear-hooks
-  (is (nil? (meta @#'hooked)))
-  (add-hook #'hooked #'asplode)
-  (is (not (nil? (meta @#'hooked))))
-  (clear-hooks #'hooked)
-  (is (nil? (meta @#'hooked)))
-  (is (= nil (clear-hooks #'hooked)))
-  (is (nil? (meta @#'hooked))))
+  (letfn [(hooked? [v]
+            (contains? (meta @v) :robert.hooke/hook))]
+    (is (not (hooked? #'hooked)))
+    (add-hook #'hooked #'asplode)
+    (is (hooked? #'hooked))
+    (clear-hooks #'hooked)
+    (is (not (hooked? #'hooked)))
+    (is (= nil (clear-hooks #'hooked)))
+    (is (not (hooked? #'hooked)))))
 
 (defn print-name [name]
   (println name))
@@ -88,5 +90,5 @@
   (is (= (keyed 1) 5))
   (remove-hook #'keyed :inc)
   (is (= (keyed 1) 4))
-  (clear-hooks)
+  (clear-hooks #'keyed)
   (is (= (keyed 1) 1)))

@@ -1,4 +1,4 @@
-(defproject robert/hooke "1.1.3"
+(defproject robert/hooke "1.2.0"
   :description "Hooke your functions!"
   :url "https://github.com/technomancy/robert-hooke"
   :profiles {:dev {:dependencies [[org.clojure/clojure "1.4.0"]]}}

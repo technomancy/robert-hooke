@@ -28,6 +28,12 @@
 
   Use the add-hook function to wrap a function in your a hook.")
 
+(defn- hooks [v]
+  (-> @v meta ::hooks))
+
+(defn- original [v]
+  (-> @v meta ::original))
+
 (defn- compose-hooks [f1 f2]
   (fn [& args]
     (apply f2 f1 args)))
@@ -35,54 +41,48 @@
 (defn- join-hooks [original hooks]
   (reduce compose-hooks original hooks))
 
-(defn- run-hooks [hook original args]
-  (apply (join-hooks original @hook) args))
+(defn- run-hooks [hooks original args]
+  (apply (join-hooks original hooks) args))
 
 (defn- prepare-for-hooks [v]
-  (when-not (:robert.hooke/hook (meta @v))
-    (let [hook (atom ())]
+  (when-not (hooks v)
+    (let [hooks (atom {})]
       (alter-var-root v (fn [original]
                           (with-meta
                             (fn [& args]
-                              (run-hooks hook original args))
+                              (run-hooks (vals @hooks) original args))
                             (assoc (meta original)
-                              :robert.hooke/hook hook
-                              :robert.hooke/original original)))))))
-
-(defn- add-unless-present [coll f]
-  (if-not (some #{f} coll)
-    (conj coll f)
-    coll))
+                              ::hooks hooks
+                              ::original original)))))))
 
 (defn add-hook
   "Add a hook function f to target-var. Hook functions are passed the
   target function and all their arguments and must apply the target to
   the args if they wish to continue execution."
-  [target-var f]
-  (prepare-for-hooks target-var)
-  (swap! (:robert.hooke/hook (meta @target-var)) add-unless-present f))
+  ([target-var f]
+     (add-hook target-var f f))
+  ([target-var key f]
+     (prepare-for-hooks target-var)
+     (swap! (hooks target-var) assoc key f)))
 
 (defn- clear-hook-mechanism [target-var]
   (alter-var-root target-var
-                  (constantly (:robert.hooke/original
-                               (meta @target-var)))))
+                  (constantly (original target-var))))
 
 (defn remove-hook
-  "Remove hook function f from target-var."
-  [target-var f]
-  (when (:robert.hooke/hook (meta @target-var))
-    (swap! (:robert.hooke/hook (meta @target-var))
-           (partial remove #{f}))
-    (when (empty? @(:robert.hooke/hook (meta @target-var)))
+  "Remove hook identified by key from target-var."
+  [target-var key]
+  (when-let [hooks (hooks target-var)]
+    (swap! hooks dissoc key)
+    (when (empty? @hooks)
       (clear-hook-mechanism target-var))))
 
 (defn clear-hooks
   "Remove all hooks from target-var."
   [target-var]
-  (when (:robert.hooke/hook (meta @target-var))
-    (swap! (:robert.hooke/hook (meta @target-var)) empty)
-    (when (empty? @(:robert.hooke/hook (meta @target-var)))
-      (clear-hook-mechanism target-var))))
+  (when-let [hooks (hooks target-var)]
+    (swap! hooks empty)
+    (clear-hook-mechanism target-var)))
 
 (defmacro prepend [target-var & body]
   `(add-hook (var ~target-var) (fn [f# & args#]
@@ -95,8 +95,8 @@
                                    ~@body
                                    val#))))
 
-(defmacro with-hooks-disabled [v & body]
-  `(do (when-not (:robert.hooke/hook (meta ~v))
-         (throw (Exception. (str "No hooks on " ~v))))
-       (binding [~v (:robert.hooke/original (meta ~v))]
+(defmacro with-hooks-disabled [f & body]
+  `(do (when-not (#'hooks (var ~f))
+         (throw (Exception. (str "No hooks on " ~f))))
+       (with-redefs [~f (#'original (var ~f))]
          ~@body)))

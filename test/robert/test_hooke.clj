@@ -32,13 +32,15 @@
     (is (hooked))))
 
 (deftest test-clear-hooks
-  (is (nil? (meta @#'hooked)))
-  (add-hook #'hooked #'asplode)
-  (is (not (nil? (meta @#'hooked))))
-  (clear-hooks #'hooked)
-  (is (nil? (meta @#'hooked)))
-  (is (= nil (clear-hooks #'hooked)))
-  (is (nil? (meta @#'hooked))))
+  (letfn [(hooked? [v]
+            (contains? (meta @v) :robert.hooke/hooks))]
+    (is (not (hooked? #'hooked)))
+    (add-hook #'hooked #'asplode)
+    (is (hooked? #'hooked))
+    (clear-hooks #'hooked)
+    (is (not (hooked? #'hooked)))
+    (is (= nil (clear-hooks #'hooked)))
+    (is (not (hooked? #'hooked)))))
 
 (defn print-name [name]
   (println name))
@@ -60,20 +62,24 @@
   (is (= :hello (ohai)))
   (is @appended))
 
-(defn ^{:dynamic true} another-fn []
+(defn another-fn []
   true)
 
 (deftest test-without-hooks
   (add-hook #'another-fn asplode)
   (is (thrown? Exception (another-fn)))
   (with-hooks-disabled another-fn
-    (is (another-fn))))
+    (is (another-fn)))) 
 
-(def skip-ran? (atom false))
+(defn keyed [x] x)
 
-(deftest ^{:skip true} skipped
-  (reset! skip-ran? true))
-
-(deftest hooks-disabled-works-around-test-selectors
-  (with-hooks-disabled test-var
-    (skipped)))
+(deftest test-hooks-with-keys
+  (is (= (keyed 1) 1))
+  (add-hook #'keyed :inc (fn [f x] (f (inc x))))
+  (is (= (keyed 1) 2))
+  (add-hook #'keyed :add-3 (fn [f x] (f (+ 3 x))))
+  (is (= (keyed 1) 5))
+  (remove-hook #'keyed :inc)
+  (is (= (keyed 1) 4))
+  (clear-hooks #'keyed)
+  (is (= (keyed 1) 1)))

@@ -95,5 +95,5 @@
 (defmacro with-hooks-disabled [v & body]
   `(do (when-not (:robert.hooke/hook (meta ~v))
          (throw (Exception. (str "No hooks on " ~v))))
-       (binding [~v (:robert.hooke/original (meta ~v))]
+       (with-redefs [~v (:robert.hooke/original (meta ~v))]
          ~@body)))

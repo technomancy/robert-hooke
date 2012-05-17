@@ -33,7 +33,7 @@
 
 (deftest test-clear-hooks
   (letfn [(hooked? [v]
-            (contains? (meta @v) :robert.hooke/hook))]
+            (contains? (meta @v) :robert.hooke/hooks))]
     (is (not (hooked? #'hooked)))
     (add-hook #'hooked #'asplode)
     (is (hooked? #'hooked))

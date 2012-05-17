@@ -36,31 +36,28 @@
   (reduce compose-hooks original hooks))
 
 (defn- run-hooks [hook original args]
-  (apply (join-hooks original @hook) args))
+  (apply (join-hooks original (vals @hook)) args))
 
 (defn- prepare-for-hooks [v]
   (when-not (:robert.hooke/hook (meta @v))
-    (let [hook (atom ())]
+    (let [hook (atom {})]
       (alter-var-root v (fn [original]
                           (with-meta
                             (fn [& args]
                               (run-hooks hook original args))
                             (assoc (meta original)
                               :robert.hooke/hook hook
-                              :robert.hooke/original original)))))))
-
-(defn- add-unless-present [coll f]
-  (if-not (some #{f} coll)
-    (conj coll f)
-    coll))
+                              :robert.hooke/original original))))))) 
 
 (defn add-hook
   "Add a hook function f to target-var. Hook functions are passed the
   target function and all their arguments and must apply the target to
   the args if they wish to continue execution."
-  [target-var f]
-  (prepare-for-hooks target-var)
-  (swap! (:robert.hooke/hook (meta @target-var)) add-unless-present f))
+  ([target-var f]
+     (add-hook target-var f f))
+  ([target-var key f]
+     (prepare-for-hooks target-var)
+     (swap! (:robert.hooke/hook (meta @target-var)) assoc key f)))
 
 (defn- clear-hook-mechanism [target-var]
   (alter-var-root target-var
@@ -68,11 +65,11 @@
                                (meta @target-var)))))
 
 (defn remove-hook
-  "Remove hook function f from target-var."
-  [target-var f]
+  "Remove hook identified by key from target-var."
+  [target-var key]
   (when (:robert.hooke/hook (meta @target-var))
     (swap! (:robert.hooke/hook (meta @target-var))
-           (partial remove #{f}))
+           dissoc key)
     (when (empty? @(:robert.hooke/hook (meta @target-var)))
       (clear-hook-mechanism target-var))))
 

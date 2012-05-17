@@ -77,3 +77,16 @@
 (deftest hooks-disabled-works-around-test-selectors
   (with-hooks-disabled test-var
     (skipped)))
+
+(defn keyed [x] x)
+
+(deftest test-hooks-with-keys
+  (is (= (keyed 1) 1))
+  (add-hook #'keyed :inc (fn [f x] (f (inc x))))
+  (is (= (keyed 1) 2))
+  (add-hook #'keyed :add-3 (fn [f x] (f (+ 3 x))))
+  (is (= (keyed 1) 5))
+  (remove-hook #'keyed :inc)
+  (is (= (keyed 1) 4))
+  (clear-hooks)
+  (is (= (keyed 1) 1)))

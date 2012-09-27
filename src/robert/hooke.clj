@@ -55,6 +55,40 @@
                               ::hooks hooks
                               ::original original)))))))
 
+(defonce hook-scopes [])
+
+(defn start-scope []
+  (locking hook-scopes
+    (alter-var-root #'hook-scopes conj {})))
+
+(defn- scope-update-fn
+  [scopes target-var]
+  (conj
+   (pop scopes)
+   (update-in (peek scopes) [target-var] #(if % % @(hooks target-var)))))
+
+(defn- possibly-record-in-scope
+  [target-var]
+  (locking hook-scopes
+    (when (seq hook-scopes)
+      (alter-var-root #'hook-scopes scope-update-fn target-var))))
+
+(defn end-scope []
+  (locking hook-scopes
+    (let [head (peek hook-scopes)]
+      (alter-var-root #'hook-scopes pop)
+      (doseq [[var old-hooks] head]
+        (reset! (hooks var) old-hooks)))))
+
+(defmacro hook-scope
+  "Defines a scope which records any change to hooks during the dynamic scope of
+its body, and restores hooks to their original state on exit of the scope."
+  [& body]
+  `(try
+     (start-scope)
+     ~@body
+     (finally (end-scope))))
+
 (defn add-hook
   "Add a hook function f to target-var. Hook functions are passed the
   target function and all their arguments and must apply the target to
@@ -63,6 +97,7 @@
      (add-hook target-var f f))
   ([target-var key f]
      (prepare-for-hooks target-var)
+     (possibly-record-in-scope target-var)
      (swap! (hooks target-var) assoc key f)))
 
 (defn- clear-hook-mechanism [target-var]

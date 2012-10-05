@@ -83,3 +83,10 @@
   (is (= (keyed 1) 4))
   (clear-hooks #'keyed)
   (is (= (keyed 1) 1)))
+
+(deftest hook-scope-test
+  (is (hooked))
+  (hook-scope
+   (add-hook #'hooked asplode)
+   (is (thrown? Exception (hooked))))
+  (is (hooked)))

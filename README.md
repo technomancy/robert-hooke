@@ -108,6 +108,22 @@ stripped out:
       (print-name "Alan Moore"))
     > Alan Moore
 
+The `hook-scope` macro provides a scope which records any change to hooks during
+the dynamic scope of its body, and restores hooks to their original state on
+exit of the scope. Note that all threads share the scope. Using the example
+functions above:
+
+    (examine "something")
+    > something
+
+    (hook-scope
+      (add-hook #'examine #'microscope)
+      (examine "something"))
+    > SOMETHING
+
+    (examine "something")
+    > something
+
 ## License
 
 Copyright © 2010-2011 Phil Hagelberg and Kevin Downey

@@ -30,31 +30,33 @@ Hooke is inspired by Emacs Lisp's defadvice and clojure.test fixtures.
 
 ## Usage
 
-    (use 'robert.hooke)
+```clj
+(use 'robert.hooke)
 
-    (defn examine [x]
-      (println x))
+(defn examine [x]
+  (println x))
 
-    (defn microscope
-      "The keen powers of observation enabled by Robert Hooke allow
-      for a closer look at any object!"
-      [f x]
-      (f (.toUpperCase x)))
+(defn microscope
+  "The keen powers of observation enabled by Robert Hooke allow
+  for a closer look at any object!"
+  [f x]
+  (f (.toUpperCase x)))
 
-    (defn doubler [f & args]
-      (apply f args)
-      (apply f args))
+(defn doubler [f & args]
+  (apply f args)
+  (apply f args))
 
-    (defn telescope [f x]
-      (f (apply str (interpose " " x))))
+(defn telescope [f x]
+  (f (apply str (interpose " " x))))
 
-    (add-hook #'examine #'microscope)
-    (add-hook #'examine #'doubler)
-    (add-hook #'examine #'telescope)
+(add-hook #'examine #'microscope)
+(add-hook #'examine #'doubler)
+(add-hook #'examine #'telescope)
 
-    (examine "something")
-    > S O M E T H I N G
-    > S O M E T H I N G
+(examine "something")
+> S O M E T H I N G
+> S O M E T H I N G
+```
 
 Hooks are functions that wrap other functions. They receive the
 original function and its arguments as their arguments. Hook
@@ -79,12 +81,15 @@ a function, it will be re-added as a hook, but if you use a var it
 will be able to detect that it's the same thing across reloads and
 avoid duplication.
 
-    (add-hook #'some.ns/target-var #'hook-function)
+```clj
+(add-hook #'some.ns/target-var #'hook-function)
+```
 
 instead of:
 
-    (add-hook #'some.ns/target-var hook-function)
-
+```clj
+(add-hook #'some.ns/target-var hook-function)
+```
 
 ## Bonus Features
 
@@ -92,21 +97,25 @@ Most of the time you'll never need more than just add-hook. But
 there's more!
 
 If you are using Hooke just to add side-effects to a function, it may
-be simpler to use the append or prepend macros:
+be simpler to use the `append` or `prepend` macros:
 
-    (prepend print-name
-      (print "The following person is awesome:"))
+```
+(prepend print-name
+  (print "The following person is awesome:"))
 
-    (print-name "Gilbert K. Chesterton")
-    > The following person is awesome:
-    > Gilbert K. Chesterton
+(print-name "Gilbert K. Chesterton")
+> The following person is awesome:
+> Gilbert K. Chesterton
+```
 
 You may also run a block of code with the hooks for a given var
 stripped out:
 
-    (with-hooks-disabled print-name
-      (print-name "Alan Moore"))
-    > Alan Moore
+```clj
+(with-hooks-disabled print-name
+  (print-name "Alan Moore"))
+> Alan Moore
+```
 
 The `with-scope` macro provides a scope which records any change to hooks during
 the dynamic scope of its body, and restores hooks to their original state on
@@ -126,6 +135,6 @@ functions above:
 
 ## License
 
-Copyright © 2010-2012 Phil Hagelberg and Kevin Downey
+Copyright © 2010-2012 Phil Hagelberg, Kevin Downey, and contributors.
 
 Distributed under the Eclipse Public License, the same as Clojure.

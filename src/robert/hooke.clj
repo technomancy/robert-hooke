@@ -36,6 +36,7 @@
 
 (defn- compose-hooks [f1 f2]
   (fn [& args]
+    ;; TODO: tracing
     (apply f2 f1 args)))
 
 (defn- join-hooks [original hooks]
@@ -80,9 +81,9 @@
       (doseq [[var old-hooks] head]
         (reset! (hooks var) old-hooks)))))
 
-(defmacro hook-scope
-  "Defines a scope which records any change to hooks during the dynamic scope of
-its body, and restores hooks to their original state on exit of the scope."
+(defmacro with-scope
+  "Defines a scope which records any change to hooks during the dynamic extent
+of its body, and restores hooks to their original state on exit of the scope."
   [& body]
   `(try
      (start-scope)

@@ -86,7 +86,7 @@
 
 (deftest hook-scope-test
   (is (hooked))
-  (hook-scope
+  (with-scope
    (add-hook #'hooked asplode)
    (is (thrown? Exception (hooked))))
   (is (hooked)))

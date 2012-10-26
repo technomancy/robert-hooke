@@ -108,7 +108,7 @@ stripped out:
       (print-name "Alan Moore"))
     > Alan Moore
 
-The `hook-scope` macro provides a scope which records any change to hooks during
+The `with-scope` macro provides a scope which records any change to hooks during
 the dynamic scope of its body, and restores hooks to their original state on
 exit of the scope. Note that all threads share the scope. Using the example
 functions above:
@@ -116,7 +116,7 @@ functions above:
     (examine "something")
     > something
 
-    (hook-scope
+    (with-scope
       (add-hook #'examine #'microscope)
       (examine "something"))
     > SOMETHING
@@ -126,6 +126,6 @@ functions above:
 
 ## License
 
-Copyright © 2010-2011 Phil Hagelberg and Kevin Downey
+Copyright © 2010-2012 Phil Hagelberg and Kevin Downey
 
 Distributed under the Eclipse Public License, the same as Clojure.

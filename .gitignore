@@ -4,4 +4,5 @@ pom.xml
 /classes/
 .lein-failures
 .lein-deps-sum
-/target/stale/dependencies
+/target
+/pom.xml.asc

@@ -131,8 +131,12 @@ of its body, and restores hooks to their original state on exit of the scope."
                                    ~@body
                                    val#))))
 
+(defmacro with-hooks-disabled-1 [f & body]
+  `(with-redefs [~f (or (#'original (var ~f)) ~f)]
+         ~@body))
+
 (defmacro with-hooks-disabled [f & body]
   `(do (when-not (#'hooks (var ~f))
          (throw (Exception. (str "No hooks on " ~f))))
-       (with-redefs [~f (#'original (var ~f))]
-         ~@body)))
+       (with-hooks-disabled-1 ~f ~@body)))
+

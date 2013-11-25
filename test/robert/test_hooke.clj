@@ -68,8 +68,7 @@
   (is (= :hello (ohai)))
   (is @appended))
 
-(defn another-fn []
-  true)
+(defn ^:dynamic another-fn [] true)
 
 (deftest test-without-hooks
   (add-hook #'another-fn asplode)

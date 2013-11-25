@@ -51,7 +51,7 @@
       (alter-var-root v (fn [original]
                           (with-meta
                             (fn [& args]
-                              (run-hooks (vals @hooks) original args))
+                              (run-hooks (vals @hooks) (with-meta original (meta v)) args))
                             (assoc (meta original)
                               ::hooks hooks
                               ::original original)))))))

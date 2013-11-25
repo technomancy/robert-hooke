@@ -17,6 +17,12 @@
   (is (= "h2\narg hi\n"
          (with-out-str (one-arg "hi")))))
 
+(deftest f-meta 
+  (defn metable [x]
+    (identity x))
+   (add-hook #'metable (fn read-meta [f & args] (meta f)))
+   (is (= (:name (metable 1)) 'metable)))
+
 (defn hooked []
   true)
 (defn asplode [f]
@@ -62,8 +68,7 @@
   (is (= :hello (ohai)))
   (is @appended))
 
-(defn another-fn []
-  true)
+(defn ^:dynamic another-fn [] true)
 
 (deftest test-without-hooks
   (add-hook #'another-fn asplode)

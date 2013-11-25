@@ -51,7 +51,7 @@
       (alter-var-root v (fn [original]
                           (with-meta
                             (fn [& args]
-                              (run-hooks (vals @hooks) original args))
+                              (run-hooks (vals @hooks) (with-meta original (meta v)) args))
                             (assoc (meta original)
                               ::hooks hooks
                               ::original original)))))))
@@ -134,5 +134,5 @@ of its body, and restores hooks to their original state on exit of the scope."
 (defmacro with-hooks-disabled [f & body]
   `(do (when-not (#'hooks (var ~f))
          (throw (Exception. (str "No hooks on " ~f))))
-       (with-redefs [~f (#'original (var ~f))]
+       (with-bindings {(var ~f) (#'original (var ~f))}
          ~@body)))

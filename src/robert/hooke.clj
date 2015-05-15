@@ -1,24 +1,24 @@
 (ns robert.hooke
   "Hooke your functions!
-    (defn examine [x]
-      (println x))
-    (defn microscope
-      \"The keen powers of observation enabled by Robert Hooke allow
-      for a closer look at any object!\"
-      [f x]
-      (f (.toUpperCase (str x))))
-    (defn doubler [f & args]
-      (apply f args)
-      (apply f args))
-    (defn telescope [f x]
-      (f (apply str (interpose \" \" x))))
-    (add-hook #'examine #'microscope)
-    (add-hook #'examine #'doubler)
-    (add-hook #'examine #'telescope)
-    ;; Now when we examine something:
-    (examine \"something\")
-    > S O M E T H I N G
-    > S O M E T H I N G
+  (defn examine [x]
+  (println x))
+  (defn microscope
+  \"The keen powers of observation enabled by Robert Hooke allow
+  for a closer look at any object!\"
+  [f x]
+  (f (.toUpperCase (str x))))
+  (defn doubler [f & args]
+  (apply f args)
+  (apply f args))
+  (defn telescope [f x]
+  (f (apply str (interpose \" \" x))))
+  (add-hook #'examine #'microscope)
+  (add-hook #'examine #'doubler)
+  (add-hook #'examine #'telescope)
+  ;; Now when we examine something:
+  (examine \"something\")
+  > S O M E T H I N G
+  > S O M E T H I N G
   Use the add-hook function to wrap a function in your a hook."
   (:require [flatland.ordered.map :as om]))
 
@@ -47,8 +47,8 @@
                             (fn [& args]
                               (run-hooks (vals @hooks) original args))
                             (assoc (meta original)
-                              ::hooks hooks
-                              ::original original)))))))
+                                   ::hooks hooks
+                                   ::original original)))))))
 
 (defonce hook-scopes [])
 
@@ -59,8 +59,8 @@
 (defn- scope-update-fn
   [scopes target-var]
   (conj
-    (pop scopes)
-    (update-in (peek scopes) [target-var] #(if % % @(hooks target-var)))))
+   (pop scopes)
+   (update-in (peek scopes) [target-var] #(if % % @(hooks target-var)))))
 
 (defn- possibly-record-in-scope
   [target-var]

@@ -1,32 +1,26 @@
 (ns robert.hooke
   "Hooke your functions!
-
-    (defn examine [x]
-      (println x))
-
-    (defn microscope
-      \"The keen powers of observation enabled by Robert Hooke allow
-      for a closer look at any object!\"
-      [f x]
-      (f (.toUpperCase (str x))))
-
-    (defn doubler [f & args]
-      (apply f args)
-      (apply f args))
-
-    (defn telescope [f x]
-      (f (apply str (interpose \" \" x))))
-
-    (add-hook #'examine #'microscope)
-    (add-hook #'examine #'doubler)
-    (add-hook #'examine #'telescope)
-
-    ;; Now when we examine something:
-    (examine \"something\")
-    > S O M E T H I N G
-    > S O M E T H I N G
-
-  Use the add-hook function to wrap a function in your a hook.")
+  (defn examine [x]
+  (println x))
+  (defn microscope
+  \"The keen powers of observation enabled by Robert Hooke allow
+  for a closer look at any object!\"
+  [f x]
+  (f (.toUpperCase (str x))))
+  (defn doubler [f & args]
+  (apply f args)
+  (apply f args))
+  (defn telescope [f x]
+  (f (apply str (interpose \" \" x))))
+  (add-hook #'examine #'microscope)
+  (add-hook #'examine #'doubler)
+  (add-hook #'examine #'telescope)
+  ;; Now when we examine something:
+  (examine \"something\")
+  > S O M E T H I N G
+  > S O M E T H I N G
+  Use the add-hook function to wrap a function in your a hook."
+  (:require [flatland.ordered.map :as om]))
 
 (defn- hooks [v]
   (-> @v meta ::hooks))
@@ -47,7 +41,7 @@
 
 (defn- prepare-for-hooks [v]
   (when-not (hooks v)
-    (let [hooks (atom {})]
+    (let [hooks (atom (om/ordered-map))]
       (alter-var-root v (fn [original]
                           (with-meta
                             (fn [& args]
@@ -65,8 +59,8 @@
 (defn- scope-update-fn
   [scopes target-var]
   (conj
-   (pop scopes)
-   (update-in (peek scopes) [target-var] #(if % % @(hooks target-var)))))
+    (pop scopes)
+    (update-in (peek scopes) [target-var] #(if % % @(hooks target-var)))))
 
 (defn- possibly-record-in-scope
   [target-var]
@@ -95,11 +89,11 @@ of its body, and restores hooks to their original state on exit of the scope."
   target function and all their arguments and must apply the target to
   the args if they wish to continue execution."
   ([target-var f]
-     (add-hook target-var f f))
+   (add-hook target-var f f))
   ([target-var key f]
-     (prepare-for-hooks target-var)
-     (possibly-record-in-scope target-var)
-     (swap! (hooks target-var) assoc key f)))
+   (prepare-for-hooks target-var)
+   (possibly-record-in-scope target-var)
+   (swap! (hooks target-var) assoc key f)))
 
 (defn- clear-hook-mechanism [target-var]
   (alter-var-root target-var

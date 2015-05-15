@@ -19,14 +19,13 @@
     (examine \"something\")
     > S O M E T H I N G
     > S O M E T H I N G
-  Use the add-hook function to wrap a function in your a hook.")
+  Use the add-hook function to wrap a function in your a hook."
+  (:require [flatland.ordered.map :as om]))
 
 (defn- hooks [v]
-  "Deref a var then get ::hooks in meta"
   (-> @v meta ::hooks))
 
 (defn- original [v]
-  "Deref a var then get ::original in meta"
   (-> @v meta ::original))
 
 (defn- compose-hooks [f1 f2]
@@ -41,33 +40,8 @@
   (apply (join-hooks original hooks) args))
 
 (defn- prepare-for-hooks [v]
-  "Add an empty hooks map and the original function to the metadata.
-  Make the var of the original function point to a new function with all hooks
-  joined.
-  Array map is used to ensure joining order of hooks.
-
-  Examples:
-  (defn examine [x]
-    (println x))
-  (defn h1 [f x]
-    (f (+ 1 x)))
-  (defn h2 [f x]
-    (f (* x 2)))
-  (defn h3 [f x]
-    (f (- x 3)))
-  (defn h4 [f x]
-    (f (* x 4)))
-  (add-hook #'examine #'h3)
-  (add-hook #'examine #'h4)
-  (add-hook #'examine #'h1)
-  (add-hook #'examine #'h2)
-  (examine 7)
-
-  In the above example the joining order of hooks is:
-  h3, h4, h1, h2, as the user has specified.
-  "
   (when-not (hooks v)
-    (let [hooks (atom (array-map))]
+    (let [hooks (atom (om/ordered-map))]
       (alter-var-root v (fn [original]
                           (with-meta
                             (fn [& args]
@@ -77,6 +51,10 @@
                               ::original original)))))))
 
 (defonce hook-scopes [])
+
+(defn start-scope []
+  (locking hook-scopes
+    (alter-var-root #'hook-scopes conj {})))
 
 (defn- scope-update-fn
   [scopes target-var]
@@ -90,6 +68,22 @@
     (when (seq hook-scopes)
       (alter-var-root #'hook-scopes scope-update-fn target-var))))
 
+(defn end-scope []
+  (locking hook-scopes
+    (let [head (peek hook-scopes)]
+      (alter-var-root #'hook-scopes pop)
+      (doseq [[var old-hooks] head]
+        (reset! (hooks var) old-hooks)))))
+
+(defmacro with-scope
+  "Defines a scope which records any change to hooks during the dynamic extent
+of its body, and restores hooks to their original state on exit of the scope."
+  [& body]
+  `(try
+     (start-scope)
+     ~@body
+     (finally (end-scope))))
+
 (defn add-hook
   "Add a hook function f to target-var. Hook functions are passed the
   target function and all their arguments and must apply the target to
@@ -100,7 +94,6 @@
    (prepare-for-hooks target-var)
    (possibly-record-in-scope target-var)
    (swap! (hooks target-var) assoc key f)))
-
 
 (defn- clear-hook-mechanism [target-var]
   (alter-var-root target-var
@@ -137,26 +130,3 @@
          (throw (Exception. (str "No hooks on " ~f))))
        (with-redefs [~f (#'original (var ~f))]
          ~@body)))
-
-
-(defn start-scope []
-  (locking hook-scopes
-    (alter-var-root #'hook-scopes conj {})))
-
-
-(defn end-scope []
-  (locking hook-scopes
-    (let [head (peek hook-scopes)]
-      (alter-var-root #'hook-scopes pop)
-      (doseq [[var old-hooks] head]
-        (reset! (hooks var) old-hooks)))))
-
-(defmacro with-scope
-  "Defines a scope which records any change to hooks during the dynamic extent
-of its body, and restores hooks to their original state on exit of the scope."
-  [& body]
-  `(try
-     (start-scope)
-     ~@body
-     (finally (end-scope))))
-

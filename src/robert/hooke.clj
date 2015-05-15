@@ -47,8 +47,8 @@
                             (fn [& args]
                               (run-hooks (vals @hooks) original args))
                             (assoc (meta original)
-                                   ::hooks hooks
-                                   ::original original)))))))
+                              ::hooks hooks
+                              ::original original)))))))
 
 (defonce hook-scopes [])
 
@@ -59,8 +59,8 @@
 (defn- scope-update-fn
   [scopes target-var]
   (conj
-   (pop scopes)
-   (update-in (peek scopes) [target-var] #(if % % @(hooks target-var)))))
+    (pop scopes)
+    (update-in (peek scopes) [target-var] #(if % % @(hooks target-var)))))
 
 (defn- possibly-record-in-scope
   [target-var]

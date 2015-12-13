@@ -7,8 +7,9 @@
     (println "mine"))
   (add-hook #'no-args (fn h1 [f] (do (println "h1") (f))))
   (add-hook #'no-args (fn h2 [f & args] (do (println "h2") (apply f args))))
-  (is (= "h1\nh2\nmine\n"
-         (with-out-str (no-args)))))
+  (let [out (with-out-str (no-args))]
+    (is (or (= "h1\nh2\nmine\n" out)
+            (= "h2\nh1\nmine\n" out)))))
 
 (deftest test-one-arg
   (defn one-arg [x]
@@ -90,3 +91,30 @@
    (add-hook #'hooked asplode)
    (is (thrown? Exception (hooked))))
   (is (hooked)))
+
+(defn answer-fn [] 42)
+
+(deftest concurrency-test
+  ;; Inject a delay into `hooks`, which is called at the start of
+  ;; `prepare-for-hooks`, to force an otherwise hard-to-reproduce race
+  ;; condition. The condition occured if two threads got a false returned from
+  ;; the call to `hooks`. Then each would creat an atom, and the second would
+  ;; clobber the first in the function's metadata.
+  (with-scope
+    (add-hook #'robert.hooke/hooks (let [counter (atom 2)]
+                                     (fn [f v]
+                                       (let [ret (f v)]
+                                         (when (pos? (swap! counter dec))
+                                           (Thread/sleep 10))
+                                         ret))))
+    (let [h1 (fn [f] (inc (f)))
+          h2 (fn [f] (inc (f)))
+          f (future (add-hook #'answer-fn h1))]
+      (Thread/sleep 3)
+      (add-hook #'answer-fn h2)
+      @f
+
+      (is (= 2 (count @(#'robert.hooke/hooks #'answer-fn))))
+
+      (remove-hook #'answer-fn h2)
+      (is (= 43 (answer-fn))))))

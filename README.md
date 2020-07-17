@@ -1,5 +1,8 @@
 # Robert Hooke
 
+This project is no longer maintained, and you are strongly advised
+against using it.
+
 Robert Hooke provides a flexible, composable mechanism by which you
 can extend behaviour of functions after they've been defined. It's named
 after [Robert Hooke FRS](http://en.wikipedia.org/wiki/Robert_Hooke), a

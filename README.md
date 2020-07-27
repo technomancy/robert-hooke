@@ -1,23 +1,22 @@
-# Robert Hooke
+# This place is not a place of honor... no highly esteemed deed is commemorated here... nothing valued is here.
 
 This project is no longer maintained, and you are strongly advised
-against using it.
+against using it. In every case where it was adopted long-term in a
+codebase, it created more problems than it solved, causing situations
+that were difficult to debug and reason about. If you wish to create
+an extension mechanism for your code, it's recommended to develop
+something more structured that facilitates debugging and
+understanding.
+
+This code is best left shunned and unused.
+
+## Robert Hooke
 
 Robert Hooke provides a flexible, composable mechanism by which you
 can extend behaviour of functions after they've been defined. It's named
 after [Robert Hooke FRS](http://en.wikipedia.org/wiki/Robert_Hooke), a
 founding member of the Royal Society who made many important
 discoveries in the fields of Gravitation, Microscopy, and Astronomy.
-
-Add this to your project.clj `:dependencies` list:
-
-    [robert/hooke "1.3.0"]
-
-If you would like to make your software extensible using Hooke, all
-you need to do is provide a convention for namespaces that will get
-loaded on startup. Then users can place files that call add-hook under
-a specific namespace prefix (my.program.hooks.*) which they can rely
-on getting loaded at startup.
 
 Hooks can change the behaviour of the functions they wrap in many
 ways:

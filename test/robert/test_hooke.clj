@@ -66,6 +66,9 @@
   true)
 
 (deftest test-without-hooks
+  (is (thrown? Exception (with-hooks-disabled another-fn)))
+  (with-hooks-disabled-1 another-fn
+    (is (another-fn)))
   (add-hook #'another-fn asplode)
   (is (thrown? Exception (another-fn)))
   (with-hooks-disabled another-fn

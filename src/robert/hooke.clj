@@ -49,12 +49,14 @@
   (when-not (hooks v)
     (let [hooks (atom {})]
       (alter-var-root v (fn [original]
-                          (with-meta
-                            (fn [& args]
-                              (run-hooks (vals @hooks) original args))
-                            (assoc (meta original)
-                              ::hooks hooks
-                              ::original original)))))))
+                          (if (::hooks (meta original))
+                            original
+                            (with-meta
+                              (fn [& args]
+                                (run-hooks (vals @hooks) original args))
+                              (assoc (meta original)
+                                     ::hooks hooks
+                                     ::original original))))))))
 
 (defonce hook-scopes [])
 
